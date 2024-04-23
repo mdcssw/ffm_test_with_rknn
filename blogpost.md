@@ -11,9 +11,9 @@ We'll compare the performances with similar C++ program on matrix multiplication
 
 As the JDK Enhancement Proposal is quite detailed, we'll try to give you a simpler overview and examples.
 
-# So, what is Foreign Function Memory, and how do I use it?
+# What is Foreign Function Memory, and how do I use it?
 
-/!\ As the API has changed over the few JEP, be sure to check the documentation for its latest version: [JDK22 iteration](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/package-summa ry.html) !  
+/!\ As the API has changed over the last few iterations, be sure to check the documentation for its latest version: [JDK22 iteration](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/package-summary.html) !  
 Very basically, FFM is trying to replace JNI, with particular focusses on safety, performance and generality.  
 So, this provides a new way to work with raw memory and native library.  
 A bunch of them are fashionable, particularly in the AI world currently.
@@ -108,31 +108,43 @@ On top of that, we developed a code similar to a C++ microbench done by TODO & T
 
 ## Data first, code later 
 
-roc_rk3588s_pc:/data/microdoc # ./jdk/bin/java --enable-native-access=ALL-UNNAMED -cp . org.rknn.Main 
-Size = 256 time = 0.00126035807
-Size = 512 time = 0.0038540170400000002
-Size = 1024 time = 0.0115888624
-Size = 2048 time = 0.06323490967999999
-Size = 4096 time = 0.84754899555
-Size = 8192 time = 14.975589004349999
-roc_rk3588s_pc:/data/microdoc # ./rknn_matmul_api_demo 
-size,rknn
-256,0.00027
-512,0.00088
-1024,0.0044
-2048,0.03026
-4096,0.78822
-8192,14.7231
+./jdk/bin/java --enable-native-access=ALL-UNNAMED -cp . org.rknn.javaMicroBenchmarks  
+
+Size = 256 seconds = 0.00126035807  
+Size = 512 seconds = 0.0038540170400000002  
+Size = 1024 seconds = 0.0115888624  
+Size = 2048 seconds = 0.06323490967999999  
+Size = 4096 seconds = 0.84754899555  
+Size = 8192 seconds = 14.975589004349999  
+
+roc_rk3588s_pc:/data/microdoc # ./cppMicroBenchmarks  
+Size = 256 seconds = 0.00027  
+Size = 512 seconds = 0.00088  
+Size = 1024 seconds = 0.0044  
+Size = 2048 seconds = 0.03026  
+Size = 4096 seconds = 0.78822  
+Size = 8192 seconds = 14.7231  
 
 ## Experimental setup
 
-This runs the multiplication for a matrice 100 times for different size of squared matrices.
+We executed two microbenchmarks:
+- A C++ microbenchmark, which is a slightly modified version of this [blogpost](https://clehaxze.tw/gemlog/2023/09-02-benchmarking-rk3588-npu-matrix-multiplcation-performance-ep2.gmi);  
+- A Java microbenchmark very similar to the C++ one, written from scratch, with the help of the java files generated jextract.  
+We run both of those microbenchmark on the [rk3588s](https://en.t-firefly.com/product/industry/rocrk3588spc) device through ADB.  
+rkn3588s is an android 64 bit system.  
 
-## Microbenchmark code
+Those benchmarks both allocate two square matrices of some size.
+The values benchmarked code is **only** the call to the framework [multiplying the matrices](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h#L346).  
+We're multipling those matrices together a hundred time, and taking the average execution time.
+The point of those benchmarking the overhead of using java while multiplying matrices relative to the matrices size.  
+
+## Microbenchmark code Important bits
+
+## Important bits
 
 ## So, how much does it cost me to use java ?
 
-## Important bits
+
 # Lesson learned 
 # Comparison to FFI?
 # Advantages and inconvenients
