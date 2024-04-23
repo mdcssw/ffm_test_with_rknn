@@ -108,7 +108,7 @@ On top of that, we developed a code similar to a C++ microbench done by TODO & T
 
 ## Data first, code later 
 
-./jdk/bin/java --enable-native-access=ALL-UNNAMED -cp . org.rknn.javaMicroBenchmarks  
+./jdk/bin/java --enable-native-access=ALL-UNNAMED -cp . org.rknn.JavaMicroBenchmarks  
 
 Size = 256 seconds = 0.00126035807  
 Size = 512 seconds = 0.0038540170400000002  

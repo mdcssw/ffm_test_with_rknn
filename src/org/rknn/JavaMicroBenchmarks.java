@@ -1,62 +1,31 @@
 package org.rknn;
 
 import java.lang.foreign.*;
-
 import static org.rknn._rknn_matmul_tensor_attr.*;
 import static org.rknn.rknn_matmul_api_h.*;
+import static org.rknn.rknn_tensor_mem.*;
 
 import org.rknn.rknn_matmul_info_t;
 import org.rknn.rknn_matmul_io_attr;
 import org.rknn.rknn_matmul_api_h;
-import static org.rknn.rknn_tensor_mem.*;
 
-public class Main {
 
-	
+public class JavaMicroBenchmarks {
+
     public static void create_random_matrix(Arena arena, MemorySegment mem, int size){
-	//System.out.println("memory = " + mem);
 	for (int i=0; i < size; i++) {
 	    MemorySegment ptr = arena.allocate(ValueLayout.JAVA_FLOAT, size);
-	    //System.out.println(i + " " + ptr);
 	    mem.setAtIndex(AddressLayout.ADDRESS, i , ptr);
-	    
 	    MemorySegment memCheck = mem.getAtIndex(AddressLayout.ADDRESS, i);
-	    //System.out.println(ptr.equals(memCheck) + " " + (ptr == memCheck) + " initial mem " + ptr + " memCheck = " + memCheck);
 	    
 	    for (long j=0 ; j < size; j++) {
 		float randomNumber = (float)Math.random()*10;
-		//System.out.println(j + " " + randomNumber);
 	        ptr.setAtIndex(ValueLayout.JAVA_FLOAT , j, randomNumber);
-		//float check = mem.getAtIndex(AddressLayout.ADDRESS, i).getAtIndex(ValueLayout.JAVA_FLOAT , j);
-		//System.out.println((randomNumber == check) + " initial float " + randomNumber + " check = " + check);
 	    }
 	}
-	//System.out.println("DONE random_matrix");
-    }
-    
+    }    
 
-    static void print_matrix_data(MemorySegment mem, int size){
-
-	System.out.println("rknn matrice: " + mem);
-	System.out.println("");
-  
-	for (int i = 0; i < size; ++i) {
-	    System.out.print(i);
-	    //System.out.print(" ");
-	    MemorySegment internalPtr = mem.getAtIndex(AddressLayout.ADDRESS,i).reinterpret(size*4); //4 bytes
-	    //System.out.println(internalPtr);
-	    System.out.print("-");
-	    for (int j = 0; j < size; ++j) {
-	         float v = internalPtr.getAtIndex(ValueLayout.JAVA_FLOAT, j);
-		 System.out.print(v);
-		 System.out.print(" ");
-	    }
-	     System.out.println("");
-	}
-	System.out.println("rknn matrice /end");
-    }      
-
-    public static void bench(int size){
+    public static void bench(int size, int numberOfIteration){
 	try (Arena arena = Arena.ofConfined()) {
 	    MemorySegment infos = rknn_matmul_info_t.allocate(arena);
 	    MemorySegment context = arena.allocate(rknn_matmul_ctx,1);
@@ -83,11 +52,7 @@ public class Main {
 					      rknn_matmul_tensor_attr.size(rknn_matmul_io_attr.C(ioAttr)));
 	    
 	    create_random_matrix(arena, virt_addr(A), size);
-	    //print_matrix_data(virt_addr(A), size);
 	    create_random_matrix(arena, virt_addr(B), size);
-	    //print_matrix_data(virt_addr(B), size);
-	    //create_random_matrix(arena, virt_addr(C), size);
-	    //print_matrix_data(virt_addr(C), size);
 
 	    rknn_matmul_set_io_mem(context.get(rknn_matmul_ctx,0),
 				   A,rknn_matmul_io_attr.A(ioAttr));
@@ -96,15 +61,15 @@ public class Main {
 	    rknn_matmul_set_io_mem(context.get(rknn_matmul_ctx,0),
 				   C,rknn_matmul_io_attr.C(ioAttr));
 
-//	    System.out.println("Trying to multiply stuff");
 	    Timer timer = new Timer();
 	    timer.pause();
-	    for(int i = 0 ; i < 100 ; ++i){
+	    for(int i = 0 ; i < numberOfIteration ; ++i){
 		timer.play();
 		rknn_matmul_run(context.get(rknn_matmul_ctx,0));
 		timer.pause();
 	    }
-	    System.out.println("Size = " + size + " time = " + timer.check() / 100);
+	    System.out.println("Size = " + size + " time = " + timer.check() / numberOfIteration);
+	    rknn_destroy(context.get(rknn_matmul_ctx,0));
 	}
     }
 
@@ -118,11 +83,14 @@ public class Main {
     };
 	
     public static void main(String[] args) {
-	bench(256);
-	bench(512);
-	bench(1024);
-	bench(2048);
-	bench(4096);
-	bench(8192);
+	int numberOfIteration = 1;
+	bench(256, numberOfIteration);
+	bench(512, numberOfIteration);
+	bench(1024, numberOfIteration);
+	bench(2048, numberOfIteration);
+	bench(4096, numberOfIteration);
+	bench(8192, numberOfIteration);
+	bench(8192*2, numberOfIteration);
+	bench(8192*2*2, numberOfIteration);
     }
 }
