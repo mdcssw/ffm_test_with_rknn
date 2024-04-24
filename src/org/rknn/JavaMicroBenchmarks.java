@@ -16,7 +16,6 @@ public class JavaMicroBenchmarks {
 	for (int i=0; i < size; i++) {
 	    MemorySegment ptr = arena.allocate(ValueLayout.JAVA_FLOAT, size);
 	    mem.setAtIndex(AddressLayout.ADDRESS, i , ptr);
-	    MemorySegment memCheck = mem.getAtIndex(AddressLayout.ADDRESS, i);
 	    
 	    for (long j=0 ; j < size; j++) {
 		float randomNumber = (float)Math.random()*10;
@@ -90,7 +89,5 @@ public class JavaMicroBenchmarks {
 	bench(2048, numberOfIteration);
 	bench(4096, numberOfIteration);
 	bench(8192, numberOfIteration);
-	bench(8192*2, numberOfIteration);
-	bench(8192*2*2, numberOfIteration);
     }
 }
