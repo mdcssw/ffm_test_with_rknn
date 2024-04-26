@@ -95,7 +95,6 @@ public class AbsTestRun {
 }
 ```
 The most important thing to remember here is that we have to type every operation related to the raw memory, by using layouts defined in [ValueLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/ValueLayout.html).  
-For more complex layouts such as strucs, you might a [MemoryLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemorySegment.html) instead.
 
 # A more tasteful example
 
@@ -130,21 +129,50 @@ Size = 8192 seconds = 14.7231
 We executed two microbenchmarks:
 - A C++ microbenchmark, which is a slightly modified version of this [blogpost](https://clehaxze.tw/gemlog/2023/09-02-benchmarking-rk3588-npu-matrix-multiplcation-performance-ep2.gmi);  
 - A Java microbenchmark very similar to the C++ one, written from scratch, with the help of the java files generated jextract.  
+
 We run both of those microbenchmark on the [rk3588s](https://en.t-firefly.com/product/industry/rocrk3588spc) device through ADB.  
 rkn3588s is an android 64 bit system.  
 
-Those benchmarks both allocate two square matrices of some size.
-The values benchmarked code is **only** the call to the framework [multiplying the matrices](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h#L346).  
-We're multipling those matrices together a hundred time, and taking the average execution time.
-The point of those benchmarking the overhead of using java while multiplying matrices relative to the matrices size.  
+Those benchmarks both allocate two square matrices of some size provided as parameters.
+The values benchmarked code is **only** the call to the framework multiplying the matrices [rknn_matmul_run](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h#L346).  
+We're multipling those matrices together a hundred time, and report the average execution time.
+The point of those benchmarks is to calculate the overhead of using java while multiplying matrices relative to the matrices size, in regard to matrice multiplication speed.  
 
-## Microbenchmark code Important bits
 
-## Important bits
+## Important FFM bits
+
+### Pointer operations
+
+[MemorySegment](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemorySegment.html) are basically pointers objects with safeguards.
+The data pointed by a given memory can be interpreted by the method get and getAtIndex.
+You also have to provide a layout, to tell the framework FFM how much bits the framework should read, and how it should interpret them.  
+The method `getAtIndex` is useful when you the data you manipulate is a collection of the same data type, whereas `get` makes more sense in the case of structures.  
+In our example, we use `getAtIndex` multiple time.
+There are instances of `get` uses in the Jextract generated code.
+Similarly, use `set` an `setAtIndex` to set the bits representing your data.
+
+There is a caveat that I want to address though.
+All 4 of those methods are checking that the memory you are accessing is indeed accessible from that pointer.
+When you create a new pointer, it comes with the expected size.
+The [following code](https://github.com/hogoww/rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L22) works: TODOCHECKLINE
+```
+MemorySegment ptr = arena.allocate(ValueLayout.JAVA_FLOAT, size);
+ptr.setAtIndex(ValueLayout.JAVA_FLOAT , j, (float)Math.random()*10);
+```
+However, the [following code](https://github.com/hogoww/rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java) doesn't: TODOCHECKLINE
+```
+TODO SNIPPET WITH GET
+```
+
+### Layouts
+The primitive types use layouts defined in [ValueLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/ValueLayout.html).  
+For addresses, you should use an [AddressLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/AddressLayout.html).
+For more complex layouts such as strucs, you might want to use a [MemoryLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemoryLayout.html) instead.
+
+
+
 
 ## So, how much does it cost me to use java ?
-
-
 # Lesson learned 
 # Comparison to FFI?
 # Advantages and inconvenients
