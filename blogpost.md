@@ -100,10 +100,10 @@ The most important thing to remember here is that we have to type every operatio
 
 We implemented a microbenchmark of matrice multiplication on a Neural Processing Unit (NPU).
 [KNN-Toolkit](https://github.com/rockchip-linux/rknn-toolkit) provides users a way to use Rockchip NPUs.
-The toolkit gives us the [library file](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/armeabi-v7a/librknnrt.so) (.so) as well as the [header file](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h) to communicate with it.
-To evaluate whether that'd be useful for our embedded java, we tested it !
-To do that, we used [jextract](https://github.com/openjdk/jextract) to generate a bunch of java boilerplate code, and we used it to write a java program that uses the NPU.
-On top of that, we developed a code similar to a C++ microbench done by TODO & TOASK
+The toolkit gives us the [library file](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/armeabi-v7a/librknnrt.so) (.so) as well as the [header file](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h) to communicate with it.  
+To evaluate whether that'd be useful for our embedded java, we tested it !  
+To do that, we used [jextract](https://github.com/openjdk/jextract) to generate a bunch of java boilerplate code, and we used it to write a java program that uses the NPU.  
+On top of that, we developed a code similar to a C++ microbench done by. 
 
 ## Data first, code later 
 
@@ -166,7 +166,7 @@ TODO SNIPPET WITH GET
 
 ### Layouts
 The primitive types use layouts defined in [ValueLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/ValueLayout.html).  
-For addresses, you should use an [AddressLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/AddressLayout.html).
+For addresses, you should use an [AddressLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/AddressLayout.html).  
 For more complex layouts such as strucs, you might want to use a [MemoryLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemoryLayout.html) instead.
 
 
