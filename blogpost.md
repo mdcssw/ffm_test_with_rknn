@@ -194,9 +194,12 @@ For more complex layouts such as strucs, you might want to use a [MemoryLayout](
 
 
 
-## So, how much does it cost me to use java ?
+## The price of abstraction
 
-| Size | C++     | Java    | relative speed |
+So, how much does it cost me to use java ?
+
+| Size | C++     | Java    | Relative speed |
+| ---- | ------- | ------- | -------------- |
 | 256  | 0.00027 | 0.00126 | 21,43 %        |
 | 512  | 0.00088 | 0.00385 | 22.86 %        |
 | 1024 | 0.00441 | 0.01159 | 38,05 %        |
