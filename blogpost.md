@@ -124,6 +124,7 @@ Size = 2048 seconds = 0.03026
 Size = 4096 seconds = 0.78822  
 Size = 8192 seconds = 14.7231  
 
+
 ## Experimental setup
 
 We executed two microbenchmarks:
@@ -151,18 +152,40 @@ In our example, we use `getAtIndex` multiple time.
 There are instances of `get` uses in the Jextract generated code.
 Similarly, use `set` an `setAtIndex` to set the bits representing your data.
 
-There is a caveat that I want to address though.
+There is a caveat that I want to address though, that we encountered while trying to check that our matrices where correct by printing them.
 All 4 of those methods are checking that the memory you are accessing is indeed accessible from that pointer.
 When you create a new pointer, it comes with the expected size.
 The [following code](https://github.com/hogoww/rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L22) works: TODOCHECKLINE
-```
+```java
+//Allocating a new row of flots, and setting its first element to a random float.
 MemorySegment ptr = arena.allocate(ValueLayout.JAVA_FLOAT, size);
-ptr.setAtIndex(ValueLayout.JAVA_FLOAT , j, (float)Math.random()*10);
+ptr.setAtIndex(ValueLayout.JAVA_FLOAT , 0, (float)Math.random()*10);
 ```
+
 However, the [following code](https://github.com/hogoww/rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java) doesn't: TODOCHECKLINE
+```java
+//Trying to access some row of the matrice, and then an element of that row.
+MemorySegment row = matrice.getAtIndex(AddressLayout.ADDRESS,0);
+float v = row.getAtIndex(ValueLayout.JAVA_FLOAT, 0);
 ```
-TODO SNIPPET WITH GET
+
+This is basically because the MemorySegment class uses bound checking on pointers.
+When a pointer is freshly created, the MemorySegment knows its size.
+However, when a pointer is randomly taken from memory, it doesn't know its size.
+It therefore sets its size to 0.
+And every bound checking will therefore fail.
+
+The correct way to do that previous snippet it the following:
+```java
+//Trying to access some row of the matrice, and then an element of that row.
+MemorySegment row = matrice.getAtIndex(AddressLayout.ADDRESS,0).reinterpret(size*4); //4 bytes;
+float v = row.getAtIndex(ValueLayout.JAVA_FLOAT, 0);
 ```
+[`reinterpret`](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemorySegment.html#reinterpret(long)) sets how much memory you're allowed to access from that MemorySegment.
+
+Note that JExtract bypasses these requirement by reinterpreting the pointer to give it the maximum possible value for its size whenever it gives you back a pointer.
+
+
 
 ### Layouts
 The primitive types use layouts defined in [ValueLayout](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/ValueLayout.html).  
@@ -171,8 +194,22 @@ For more complex layouts such as strucs, you might want to use a [MemoryLayout](
 
 
 
-
 ## So, how much does it cost me to use java ?
-# Lesson learned 
-# Comparison to FFI?
-# Advantages and inconvenients
+
+| Size | C++     | Java    | relative speed |
+| 256  | 0.00027 | 0.00126 | 21,43 %        |
+| 512  | 0.00088 | 0.00385 | 22.86 %        |
+| 1024 | 0.00441 | 0.01159 | 38,05 %        |
+| 2048 | 0.03026 | 0.06324 | 47,85 %        |
+| 4096 | 0.78822 | 0.84755 | 92.99 %        |
+| 8192 | 14.7231 | 14.9756 | 98,31 %        |
+
+From that table, we can clearly see that the bigger the matrice, the more time is spend in the NPU itself rather than on switching the execution context to execute.
+On small matrix multiplications, the context switch imposes a heavy toll.
+But on bigger matrices, it is barely noticeable !
+
+
+# Possible other sections, not sure how they'd look.
+ Lesson learned 
+ Comparison to FFI?
+ Advantages and inconvenients

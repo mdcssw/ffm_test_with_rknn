@@ -24,6 +24,26 @@ public class JavaMicroBenchmarks {
 	}
     }    
 
+    static void print_matrix_data(MemorySegment mem, int size){
+
+	System.out.println("rknn matrice: " + mem);
+	System.out.println("");
+  
+	for (int i = 0; i < size; ++i) {
+	    System.out.print(i);
+	    MemorySegment internalPtr = mem.getAtIndex(AddressLayout.ADDRESS,i).reinterpret(size*4); //4 bytes
+	    System.out.print("-");
+	    for (int j = 0; j < size; ++j) {
+                float v = internalPtr.getAtIndex(ValueLayout.JAVA_FLOAT, j);
+                System.out.print(v);
+                System.out.print(" ");
+	    }
+            System.out.println("");
+        }
+	System.out.println("rknn matrice /end");
+    }      
+
+    
     public static void bench(int size, int numberOfIteration){
 	try (Arena arena = Arena.ofConfined()) {
 	    MemorySegment infos = rknn_matmul_info_t.allocate(arena);
