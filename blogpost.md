@@ -2,12 +2,13 @@
 
 Do you know Foreign Function Memory(FFM) ?  
 It's a part of the Java runtime that allows developer to manipulate raw memory.  
-It's been in development for the past 3 JDKs, and is now coming as a full-fledged into [JDK 22](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/package-summary.html) !  
+It's been in development for the past few JDKs, and is now coming as a full-fledged feature into [JDK 22](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/package-summary.html) !  
 We've been taking a look at this last iteration, and how to do stuff with it.  
-Moreover, the tool [jextract](https://github.com/openjdk/jextract) generates java sources from a C header, allowing quick binding to a native library.
+  
+Moreover, the tool [jextract](https://github.com/openjdk/jextract) generates java sources from a C header, allowing quick binding to a native library.  
 Since we're working on embedded development at this time, we took an example specific to embedded development.  
-We're trying to multiply matrices on an Neural Processing Unit (aka NPU, basically a specialized CPU).  
-We'll compare the performances with similar C++ program on matrix multiplications. 
+We're multiplying matrices on an Neural Processing Unit (aka NPU, basically a specialized CPU).  
+We'll compare the performances with similar C++. 
 
 As the JDK Enhancement Proposal is quite detailed, we'll try to give you a simpler overview and examples.
 
@@ -16,7 +17,7 @@ As the JDK Enhancement Proposal is quite detailed, we'll try to give you a simpl
 /!\ As the API has changed over the last few iterations, be sure to check the documentation for its latest version: [JDK22 iteration](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/package-summary.html) !  
 Very basically, FFM is trying to replace JNI, with particular focusses on safety, performance and generality.  
 So, this provides a new way to work with raw memory and native library.  
-A bunch of them are fashionable, particularly in the AI world currently.
+A bunch of native library are quite fashionable at the moment, particularly in the AI world.
 
 
 ## 5 minutes tutorial
@@ -45,24 +46,25 @@ public class FindStdLibFunction {
     }
 }
 ```
-The important points to note here, are that native libraries are found by an instance of the [Linker class](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/Linker.html).
+The important points to note here, are that native libraries are found by an instance of the [Linker class](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/Linker.html).  
 
 ### Execute some native code
-More interestingly, the following example actually executes a stdlib function: [abs](https://cplusplus.com/reference/cstdlib/abs/).
+More interestingly, the following example actually executes a stdlib function: [abs](https://cplusplus.com/reference/cstdlib/abs/).  
 
-This code starts by creating a java object that knows how to execute the native function.
-To create the [MethodHandle](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/invoke/MethodHandle.html), it needs:
-1. The address of the function that, we found in the previous code snippet;
-2. The method type signature, that we can find in a C header or the documentation.
+This code starts by creating a java object that knows how to execute the native function.  
+To create the [MethodHandle](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/invoke/MethodHandle.html), it needs:  
+1. The address of the function that we found in the previous code snippet;  
+2. The method type signature, that we can find in a C header or the documentation.  
 
-Second, we need a way to pass our arguments to the native function.
-For that purpose, we use an arena.
-An arena basically represent a block of raw memory that is outside of the java heap that you can manipulate as raw memory.
+Second, we need a way to pass our arguments to the native function.  
+For that purpose, we use an arena.  
+An arena basically represent a block of raw memory that is outside of the java heap that you can manipulate as raw memory.  
 Arena can allocate some pointers, [MemorySegment](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemorySegment.html), towards the memory it represents.
-Here, we allocate the space for two integers.
-Then, we set their values with the method [setAtIndex](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemorySegment.html#setAtIndex(java.lang.foreign.ValueLayout.OfInt,long,int)).
+Here, we allocate the space for two integers.  
+Then, we set their values with the method [setAtIndex](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/foreign/MemorySegment.html#setAtIndex(java.lang.foreign.ValueLayout.OfInt,long,int)).  
 
-Finally, once our function and our arguments are ready, we use [invokeExact](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/invoke/MethodHandle.html#invokeExact(java.lang.Object...)) to execute the native function.  
+Finally, once our function and our arguments are ready, we use [invokeExact](https://docs.oracle.com/en/java/javase/22/docs/api/java.base/java/lang/invoke/MethodHandle.html#invokeExact(java.lang.Object...)) to execute the native function.    
+  
 ```java
 import java.lang.foreign.Arena;
 import java.lang.foreign.Linker;
@@ -98,12 +100,12 @@ The most important thing to remember here is that we have to type every operatio
 
 # A more tasteful example
 
-We implemented a microbenchmark of matrice multiplication on a Neural Processing Unit (NPU).
+We implemented a microbenchmark of matrice multiplication on a Neural Processing Unit (NPU).  
 [KNN-Toolkit](https://github.com/rockchip-linux/rknn-toolkit) provides users a way to use Rockchip NPUs.
 The toolkit gives us the [library file](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/armeabi-v7a/librknnrt.so) (.so) as well as the [header file](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h) to communicate with it.  
 To evaluate whether that'd be useful for our embedded java, we tested it !  
 To do that, we used [jextract](https://github.com/openjdk/jextract) to generate a bunch of java boilerplate code, and we used it to write a java program that uses the NPU.  
-On top of that, we developed a code similar to a C++ microbench done by. 
+On top of that, we developed a code similar to a C++ microbench done by ADDAUTHORANDLINK. 
 
 ## Data first, code later 
 
@@ -139,8 +141,24 @@ The values benchmarked code is **only** the call to the framework multiplying th
 We're multipling those matrices together a hundred time, and report the average execution time.
 The point of those benchmarks is to calculate the overhead of using java while multiplying matrices relative to the matrices size, in regard to matrice multiplication speed.  
 
+## So, how much does it cost me to use java ?
+
+| Size | C++     | Java    | relative speed |
+| ---- | ------- | ------- | -------------- |
+| 256  | 0.00027 | 0.00126 | 21,43 %        |
+| 512  | 0.00088 | 0.00385 | 22.86 %        |
+| 1024 | 0.00441 | 0.01159 | 38,05 %        |
+| 2048 | 0.03026 | 0.06324 | 47,85 %        |
+| 4096 | 0.78822 | 0.84755 | 92.99 %        |
+| 8192 | 14.7231 | 14.9756 | 98,31 %        |
+
+From that table, we can clearly see that the bigger the matrice, the more time is spend in the NPU itself rather than on switching the execution context to execute.
+On small matrix multiplications, the context switch imposes a heavy toll.
+But on bigger matrices, it is barely noticeable !
 
 ## Important FFM bits
+
+We're now explaining some details that were non obvious to us, while we were writing this blogpost.
 
 ### Pointer operations
 
@@ -194,20 +212,11 @@ For more complex layouts such as strucs, you might want to use a [MemoryLayout](
 
 
 
-## So, how much does it cost me to use java ?
+# Conclusion
 
-| Size | C++     | Java    | relative speed |
-| 256  | 0.00027 | 0.00126 | 21,43 %        |
-| 512  | 0.00088 | 0.00385 | 22.86 %        |
-| 1024 | 0.00441 | 0.01159 | 38,05 %        |
-| 2048 | 0.03026 | 0.06324 | 47,85 %        |
-| 4096 | 0.78822 | 0.84755 | 92.99 %        |
-| 8192 | 14.7231 | 14.9756 | 98,31 %        |
-
-From that table, we can clearly see that the bigger the matrice, the more time is spend in the NPU itself rather than on switching the execution context to execute.
-On small matrix multiplications, the context switch imposes a heavy toll.
-But on bigger matrices, it is barely noticeable !
-
+In this blogpost you saw how to use the new feature *Foreign Function Memory* in JDK22.
+You read some very basic examples as well as the real world example of using FFM to use a NPU.
+Finally, we described details that were non obvious to us.
 
 # Possible other sections, not sure how they'd look.
  Lesson learned 
