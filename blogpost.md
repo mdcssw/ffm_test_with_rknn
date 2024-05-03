@@ -105,8 +105,8 @@ The most important thing to remember here is that we have to specify the type fo
 # A more tasteful example
 
 We implemented a micro-benchmark of matrix multiplication on a Neural Processing Unit.
-[RKNN-Toolkit](https://github.com/rockchip-linux/rknn-toolkit) provides a way to use *Rockchip* NPUs on devices that have them.
-The toolkit gives us the [shared library (`librknnrt.so`)](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/armeabi-v7a/librknnrt.so) as well as the [C header file (`rknn_matmul_api.h`)](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h) in order to communicate with the NPU.
+[RKNN-Toolkit](https://github.com/airockchip/rknn-toolkit2/tree/master) provides a way to use *Rockchip* NPUs on devices that have them.
+The toolkit gives us the [shared library (`librknnrt.so`)](https://github.com/airockchip/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/arm64-v8a/librknnrt.so) as well as the [C header file (`rknn_matmul_api.h`)](https://github.com/airockchip/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_api.h) in order to communicate with the NPU.
 To evaluate whether that would be useful for our embedded Java, we tested it!
 To do that, we used [`jextract`](https://github.com/openjdk/jextract) to generate a bunch of Java boilerplate code, and we used it to write a Java program that uses the NPU.
 On top of that, we developed code similar to a C++ micro-benchmark implemented by [Martin Chang](https://clehaxze.tw/gemlog/2023/09-02-benchmarking-rk3588-npu-matrix-multiplcation-performance-ep2.gmi).
@@ -142,14 +142,14 @@ We run both of those micro-benchmark on the [`rk3588s`](https://en.t-firefly.com
 `rkn3588s` runs a 64-bits Android operating system.
 
 Those benchmarks both allocate two square matrices of some size provided as a parameter.
-The benchmark covers **only** the call to the framework multiplying the matrices [`rknn_matmul_run`](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h#L346).
+The benchmark covers **only** the call to the framework multiplying the matrices [`rknn_matmul_run`](https://github.com/airockchip/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h#L479).
 We're multiplying those matrices together one hundred times, before reporting the average execution time.
 The point of those benchmarks is to calculate the overhead of using Java while multiplying matrices relative to the matrices size, compared to matrix multiplication speed.
 
 ## So, how much does it cost me to use Java ?
 The following table compiles the previous results, and compares the java results to a baseline, the C++ code.
-Here's the full [java](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/java/org/rknn/JavaMicroBenchmarks.java) code.
-Here's the full [c++](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/cpp/rknn_matmul_api_demo.cpp) code.
+Here's the full [java](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/java/org/rknn/JavaMicroBenchmarks.java) code.  
+Here's the full [c++](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/cpp/rknn_matmul_api_demo.cpp) code.  
 
 | Matrix size | C++     | Java    | Relative performance |
 | ----------- | ------- | ------- | -------------------- |
