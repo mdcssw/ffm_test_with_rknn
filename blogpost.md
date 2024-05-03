@@ -225,9 +225,3 @@ For more complex layouts such as structures, you might want to use a [`MemoryLay
 In this blog post you saw how to use the new feature *Foreign Function Memory* in JDK 22.
 You read some very basic examples as well as a real world example of using FFM to use an NPU.
 Finally, we described details that were not obvious to us.
-
-# Possible other sections, not sure how they'd look.
-
-- Lesson learned
-- Comparison to FFI?
-- Advantages and drawbacks
