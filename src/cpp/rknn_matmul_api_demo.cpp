@@ -1,7 +1,7 @@
 // Example comming from :
 //https://clehaxze.tw/gemlog/2023/09-02-benchmarking-rk3588-npu-matrix-multiplcation-performance-ep2.gmi
 // Original full code : https://gist.github.com/marty1885/a939e3cda146e333195bf8f62fde7a95
-
+// Compiled with https://github.com/airockchip/rknn-toolkit2/blob/master/rknpu2/examples/rknn_matmul_api_demo/build-android.sh
 #include <chrono>
 #include <iostream>
 #include <vector>
