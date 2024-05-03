@@ -23,7 +23,7 @@ The use of a bunch of native libraries is quite fashionable at the moment, parti
 
 Since it has a strong focus on native library linking, let's link some libraries!
 Notice that the following are full examples.
-They are compilable and executable with a JDK 22, such as this one: **TODOLINK**.
+They are compilable and executable with a JDK 22, such as this [JDK22](https://adoptium.net/de/temurin/releases/?version=22).
 
 ### Find some native code
 
@@ -109,7 +109,7 @@ We implemented a micro-benchmark of matrix multiplication on a Neural Processing
 The toolkit gives us the [shared library (`librknnrt.so`)](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/armeabi-v7a/librknnrt.so) as well as the [C header file (`rknn_matmul_api.h`)](https://github.com/rockchip-linux/rknn-toolkit2/blob/master/rknpu2/runtime/Android/librknn_api/include/rknn_matmul_api.h) in order to communicate with the NPU.
 To evaluate whether that would be useful for our embedded Java, we tested it!
 To do that, we used [`jextract`](https://github.com/openjdk/jextract) to generate a bunch of Java boilerplate code, and we used it to write a Java program that uses the NPU.
-On top of that, we developed code similar to a C++ micro-benchmark implemented by **TODOADDAUTHORANDLINK**.
+On top of that, we developed code similar to a C++ micro-benchmark implemented by [Martin Chang](https://clehaxze.tw/gemlog/2023/09-02-benchmarking-rk3588-npu-matrix-multiplcation-performance-ep2.gmi).
 
 ## Data first, code later
 
@@ -147,23 +147,20 @@ We're multiplying those matrices together one hundred times, before reporting th
 The point of those benchmarks is to calculate the overhead of using Java while multiplying matrices relative to the matrices size, compared to matrix multiplication speed.
 
 ## So, how much does it cost me to use Java ?
+The following table compiles the previous results, and compares the java results to a baseline, the C++ code.
 
-**TODO**: Add the baseline to the table to show where the percentages come from.
-
-| Matrix size | C++     | Java    | Relative speed |
-| ----------- | ------- | ------- | -------------- |
-| 256         | 0.00027 | 0.00126 | 21.43%        |
-| 512         | 0.00088 | 0.00385 | 22.86%        |
-| 1024        | 0.00441 | 0.01159 | 38.05%        |
-| 2048        | 0.03026 | 0.06324 | 47.85%        |
-| 4096        | 0.78822 | 0.84755 | 92.99%        |
-| 8192        | 14.7231 | 14.9756 | 98.31%        |
+| Matrix size | C++     | Java    | Relative performance |
+| ----------- | ------- | ------- | -------------------- |
+| 256         | 0.00027 | 0.00126 | 21.43%               |
+| 512         | 0.00088 | 0.00385 | 22.86%               |
+| 1024        | 0.00441 | 0.01159 | 38.05%               |
+| 2048        | 0.03026 | 0.06324 | 47.85%               |
+| 4096        | 0.78822 | 0.84755 | 92.99%               |
+| 8192        | 14.7231 | 14.9756 | 98.31%               |
 
 From that table, we can clearly see that the bigger the matrix is, the more time is spent in the NPU.
 
-On small matrix multiplications, the context switch imposes a heavy toll.
-> **TODO** How do you know? ---------^^^^^^^^^^^^^^
-
+On small matrix multiplications, there is a heavy runtime cost.
 But on bigger matrices, it is barely noticeable!
 
 ## Important FFM bits
@@ -182,7 +179,7 @@ Similarly, use `set` and `setAtIndex` to set the bits representing your data.
 There is a caveat that I want to address though, which we encountered while trying to check that our matrices were correct by printing them.
 A `MemorySegment` checks that memory access are in bounds, given the *size* it contains.
 When you create a new `MemorySegment` via `Arena.allocate`, it comes with the correct size.
-The [following code](https://github.com/hogoww/rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L22) works: **TODOCHECKLINE**
+The [following code](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L17) works:
 
 ```java
 // Allocating a new array of floats, and setting its first element to a random float.
@@ -190,7 +187,7 @@ MemorySegment ptr = arena.allocate(ValueLayout.JAVA_FLOAT, size);
 ptr.setAtIndex(ValueLayout.JAVA_FLOAT, 0, (float) Math.random() * 10);
 ```
 
-However, calling `MemorySegment.getAtIndex` (see the [following code](https://github.com/hogoww/rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java)) creates a `MemorySegment` with an **incorrect size**: **TODOCHECKLINE**
+However, calling `MemorySegment.getAtIndex` (see the [following code](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L34)) creates a `MemorySegment` with an **incorrect size**:
 
 ```java
 // Trying to access some row of the matrix, and then an element of that row.
