@@ -148,6 +148,8 @@ The point of those benchmarks is to calculate the overhead of using Java while m
 
 ## So, how much does it cost me to use Java ?
 The following table compiles the previous results, and compares the java results to a baseline, the C++ code.
+Here's the full [java](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/java/org/rknn/JavaMicroBenchmarks.java) code.
+Here's the full [c++](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/cpp/rknn_matmul_api_demo.cpp) code.
 
 | Matrix size | C++     | Java    | Relative performance |
 | ----------- | ------- | ------- | -------------------- |
@@ -179,7 +181,7 @@ Similarly, use `set` and `setAtIndex` to set the bits representing your data.
 There is a caveat that I want to address though, which we encountered while trying to check that our matrices were correct by printing them.
 A `MemorySegment` checks that memory access are in bounds, given the *size* it contains.
 When you create a new `MemorySegment` via `Arena.allocate`, it comes with the correct size.
-The [following code](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L17) works:
+The [following code](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/java/org/rknn/JavaMicroBenchmarks.java#L17) works:
 
 ```java
 // Allocating a new array of floats, and setting its first element to a random float.
@@ -187,7 +189,7 @@ MemorySegment ptr = arena.allocate(ValueLayout.JAVA_FLOAT, size);
 ptr.setAtIndex(ValueLayout.JAVA_FLOAT, 0, (float) Math.random() * 10);
 ```
 
-However, calling `MemorySegment.getAtIndex` (see the [following code](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/org/rknn/JavaMicroBenchmarks.java#L34)) creates a `MemorySegment` with an **incorrect size**:
+However, calling `MemorySegment.getAtIndex` (see the [following code](https://github.com/mdcssw/ffm_test_with_rknn/blob/main/src/java/org/rknn/JavaMicroBenchmarks.java#L34)) creates a `MemorySegment` with an **incorrect size**:
 
 ```java
 // Trying to access some row of the matrix, and then an element of that row.
